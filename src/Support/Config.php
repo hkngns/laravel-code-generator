@@ -658,6 +658,17 @@ class Config
             }
         }
 
+        foreach ($customValues as $key => $custom) {
+            if (!is_array($custom) || !array_key_exists('match', $custom) || !array_key_exists('set', $custom)) {
+                continue;
+            }
+
+            $final[] = [
+                'match' => (array) $custom['match'],
+                'set'  => (array) $custom['set'],
+            ];
+        }
+        
         return $final;
     }
 
@@ -670,7 +681,7 @@ class Config
      *
      * @return array
      */
-    protected static function mergeDefinitions(array $keys, array $customs, array $defaultValues)
+    protected static function mergeDefinitions(array $keys, array &$customs, array $defaultValues)
     {
         $final = $defaultValues;
 
@@ -684,6 +695,10 @@ class Config
 
             if (!empty($combined)) {
                 $final = array_merge($final, (array) $custom['set']);
+                $customDiff = array_diff($matches, $combined);
+                if (!empty($customDiff)) {
+                    $customs[$key]['match'] = $customDiff;    
+                }
             }
         }
 
